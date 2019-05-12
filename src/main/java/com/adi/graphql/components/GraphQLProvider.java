@@ -1,8 +1,12 @@
 package com.adi.graphql.components;
 
+import com.coxautodev.graphql.tools.GraphQLResolver;
+import com.coxautodev.graphql.tools.SchemaParserOptions;
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import graphql.GraphQL;
+import graphql.execution.SubscriptionExecutionStrategy;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
@@ -14,10 +18,12 @@ import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 @Component
 public class GraphQLProvider {
@@ -26,6 +32,15 @@ public class GraphQLProvider {
     private GraphQLDataFetchers graphQLDataFetchers;
 
     private GraphQL graphQL;
+
+    @Autowired
+    private Subscription subscription;
+
+    @Autowired
+    private Query query;
+
+    @Autowired
+    private EventQR eventQR;
 
     @Bean
     public GraphQL graphQL() {
@@ -36,8 +51,22 @@ public class GraphQLProvider {
     public void init() throws IOException {
         URL url = Resources.getResource("schema.graphqls");
         String sdl = Resources.toString(url, Charsets.UTF_8);
-        GraphQLSchema graphQLSchema = buildSchema(sdl);
-        this.graphQL = GraphQL.newGraphQL(graphQLSchema).build();
+        GraphQLSchema graphQLSchema = buildSchema();//buildSchema(sdl);
+        this.graphQL = GraphQL.newGraphQL(graphQLSchema)
+                .subscriptionExecutionStrategy(new SubscriptionExecutionStrategy()).build();
+    }
+
+    private GraphQLSchema buildSchema() {
+        List<GraphQLResolver<? extends Object>> resolvers = ImmutableList.of(query, subscription, eventQR);
+        SchemaParserOptions options = SchemaParserOptions.newOptions()
+                .genericWrappers(new SchemaParserOptions.GenericWrapper(Flux.class, 0))
+                .build();
+        return com.coxautodev.graphql.tools.SchemaParser.newParser()
+                .file("schema.graphqls")
+                .resolvers(resolvers)
+                .options(options)
+                .build()
+                .makeExecutableSchema();
     }
 
     private GraphQLSchema buildSchema(String sdl) {

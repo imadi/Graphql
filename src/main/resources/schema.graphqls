@@ -1,6 +1,11 @@
 type Query {
-    bookById(id: ID): Book
-    allBooks: [Book]
+    persons: [Person]
+    events: [Event]
+}
+
+type Person {
+    id: String
+    name: String
 }
 
 type Book {
@@ -14,4 +19,13 @@ type Author {
     id: ID
     firstName: String
     lastName: String
+}
+
+type Event {
+    id: Long
+    date: String
+}
+
+type Subscription {
+    counter: Int
 }
