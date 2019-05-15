@@ -1,6 +1,5 @@
 type Query {
-    persons: [Person]
-    events: [Event]
+
 }
 
 type Person {
@@ -8,24 +7,6 @@ type Person {
     name: String
 }
 
-type Book {
-    id: ID
-    name: String
-    pageCount: Int
-    author: Author
-}
-
-type Author {
-    id: ID
-    firstName: String
-    lastName: String
-}
-
-type Event {
-    id: Long
-    date: String
-}
-
 type Subscription {
-    counter: Int
+    persons: Person
 }
