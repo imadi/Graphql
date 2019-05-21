@@ -4,6 +4,7 @@ package com.adi.graphql.controllers;
 import graphql.GraphQLError;
 import graphql.spring.web.reactive.GraphQLInvocation;
 import graphql.spring.web.reactive.GraphQLInvocationData;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -31,7 +33,12 @@ public class CustomGraphQLController {
             if (!errors.isEmpty()) {
                 return Flux.error(new ResponseStatusException(INTERNAL_SERVER_ERROR, errors.get(0).toString()));
             }
-            return Flux.from(executionResult.getData());
+            if (executionResult.getData() instanceof Publisher) {
+                return Flux.from(executionResult.getData());
+            } else {
+                return Mono.just(executionResult);
+            }
+
         });
     }
 

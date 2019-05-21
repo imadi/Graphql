@@ -8,6 +8,8 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class PersonSubscriptionResolver implements GraphQLSubscriptionResolver, GraphQLQueryResolver {
 
@@ -16,6 +18,10 @@ public class PersonSubscriptionResolver implements GraphQLSubscriptionResolver, 
 
     public Publisher<Person> persons() {
         return personRepository.getPersons();
+    }
+
+    public List<Person> person() {
+        return personRepository.getPersonList();
     }
 
 }

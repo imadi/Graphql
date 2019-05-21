@@ -26,4 +26,9 @@ public class PersonRepository {
         return Flux.zip(personFlux, Flux.interval(Duration.ofSeconds(1))).map(Tuple2::getT1); //Added 1 second delay to simulate 1 sec.
     }
 
+
+    public List<Person> getPersonList() {
+        return personList;
+    }
+
 }
